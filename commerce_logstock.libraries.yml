@@ -1,0 +1,13 @@
+commerce_logstock:
+  version: VERSION
+  js:
+    js/commerce_logstock.js: { }
+  css:
+    theme:
+      css/commerce_logstock.css: { }
+  dependencies:
+    - core/jquery
+    - core/drupal.ajax
+    - core/drupal
+    - core/drupalSettings
+    - core/jquery.once

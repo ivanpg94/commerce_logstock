@@ -1,0 +1,39 @@
+commerce_logstock.logmanage:
+  path: '/admin/commerce/log_stock'
+  defaults:
+    _title: 'Logs stock'
+    _controller: '\Drupal\commerce_logstock\Controller\LogController::manageLogs'
+  requirements:
+    _permission: 'administer commerce logstock'
+
+commerce_logstock.pagination_log_ajax:
+  path: '/ajax/commerce_logstock/table/page/{no}'
+  defaults:
+    _controller: '\Drupal\commerce_logstock\Controller\LogController::tablePaginationAjax'
+    _title: 'Table Pagination logs'
+  requirements:
+    _permission: 'administer commerce logstock'
+
+commerce_logstock.autocomplete.filter:
+  path: '/admin/commerce/log_stock/filter'
+  defaults:
+    _controller: '\Drupal\commerce_logstock\Controller\LogController::pedidoAutocomplete'
+    _format: json
+  requirements:
+    _permission: 'access content'
+
+commerce_logstock.autocomplete.filterproducto:
+  path: '/admin/commerce/log_stock/producto'
+  defaults:
+    _controller: '\Drupal\commerce_logstock\Controller\LogController::productoAutocomplete'
+    _format: json
+  requirements:
+    _permission: 'access content'
+
+commerce_logstock.autocomplete.filterfecha:
+  path: '/admin/commerce/log_stock/fecha'
+  defaults:
+    _controller: '\Drupal\commerce_logstock\Controller\LogController::fechaAutocomplete'
+    _format: json
+  requirements:
+    _permission: 'access content'

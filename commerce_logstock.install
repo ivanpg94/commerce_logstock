@@ -1,0 +1,67 @@
+<?php
+
+use Drupal\Core\Database\Database;
+
+/**
+ * Implements hook_schema().
+ */
+function commerce_logstock_schema(){
+  $schema['commerce_logstock'] = array(
+    'description' => 'The table for storing the stock data.',
+    'fields' => array(
+      'fechacompleta' => array(
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+      ),
+      'producto' => array(
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+      ),
+      'producto_label' => array(
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+      ),
+      'pedido' => array(
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+      ),
+      'fecha' => array(
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+      ),
+      'hora' =>array(
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+      ),
+      'stockinicial' => array(
+        'description' => 'Stock inicial',
+        'type' => 'int',
+        'not null' => TRUE,
+      ),
+      'stockfinal' => array(
+        'description' => 'Stock final',
+        'type' => 'int',
+        'not null' => TRUE,
+      ),
+      'user' => array(
+              'type' => 'varchar',
+              'length' => 255,
+              'not null' => TRUE,
+            ),
+    ),
+  'primary key' => array('fechacompleta'), // Cambiar esto según tu necesidad
+      'indexes' => array(
+        'idx_fecha_producto' => array('fechacompleta', 'producto'),
+      ),
+      'mysql_table_type' => 'InnoDB',
+      'mysql_character_set' => 'utf8mb4',
+      'mysql_table_options' => 'ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=DYNAMIC ORDER BY fechacompleta DESC',
+    );
+  return $schema;
+}

@@ -1,0 +1,5 @@
+services:
+  Drupal\commerce_logstock\EventSubscriber\StockTransactionEventSubscriber:
+    arguments: [ '@database' ]
+    tags:
+      - { name: 'event_subscriber' }

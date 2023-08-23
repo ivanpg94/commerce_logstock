@@ -1,0 +1,28 @@
+
+.logstock-container .fieldset__wrapper{
+  display: flex;
+}
+.logstock-container .fieldset__wrapper .form-item{
+  width: 20%;
+  margin-right: 1rem;
+}
+.logstock-container .fieldset__wrapper .form-actions{
+  margin-top: 2rem;
+  flex-wrap: nowrap;
+}
+.pagination{
+  margin: 0 auto;
+  width: 50%;
+  display: flex;
+  justify-content: space-around;
+}
+.pagination a {
+  text-decoration: none;
+  color: black;
+}
+.log-table-form thead th a:first-child{
+  display: none;
+}
+.log-table-form thead th a:nth-child(2){
+  display: none;
+}

@@ -1,0 +1,10 @@
+name: 'commerce logstock'
+description: 'Log stock'
+type: module
+package: 'Commerce (custom)'
+dependencies:
+  commerce: 'drupal:commerce'
+core: 8.x
+core_version_requirement: ^8 || ^9
+libraries:
+  - commerce_logstock/commerce_logstock

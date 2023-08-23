@@ -1,0 +1,63 @@
+<?php
+
+use Drupal\Core\Url;
+use Drupal\Core\Link;
+
+function commerce_logstock_element_info_alter(array &$types) {
+
+  if (isset($types['table'])) {
+    $types['table']['#attached']['library'][] = 'commerce_logstock/commerce_logstock';
+  }
+}
+
+function getPager(){
+  $pedido = \Drupal::request()->query->get('pedido');
+  $producto = \Drupal::request()->query->get('producto');
+  $fecha = \Drupal::request()->query->get('fecha');
+
+  if($pedido !==null && $pedido !==""){
+    $query = \Drupal::database()->select('commerce_logstock', 't');
+    $query->condition('pedido', $pedido);
+    $query->addExpression('COUNT(*)');
+    $count = $query->execute()->fetchField();
+
+  }else if($fecha !==null && $fecha !==""){
+    $query = \Drupal::database()->select('commerce_logstock', 't');
+    $query->condition('fecha', $fecha);
+    $query->addExpression('COUNT(*)');
+    $count = $query->execute()->fetchField();
+  }else if($producto !==null && $producto !==""){
+    $query = \Drupal::database()->select('commerce_logstock', 't');
+    $query->condition('producto', $producto);
+    $query->addExpression('COUNT(*)');
+    $count = $query->execute()->fetchField();
+
+  }else{
+    $query = \Drupal::database()->select('commerce_logstock', 't');
+    $query->addExpression('COUNT(*)');
+    $count = $query->execute()->fetchField();
+  }
+
+  $count = ceil($count/15);
+
+  $page_link = Url::fromUserInput('/ajax/commerce_logstock/table/page/0');
+  $page_link = Link::fromTextAndUrl('<<', $page_link);
+  $page_link = $page_link->toRenderable();
+  $page_link['#attributes'] = ['class'=>['use-ajax']];
+  $out = render($page_link);
+  for($i = 0; $i < $count; $i++){
+    $page = Url::fromUserInput('/ajax/commerce_logstock/table/page/'.$i);
+    $pageLink =  Link::fromTextAndUrl($i, $page);
+    $pageLink = $pageLink->toRenderable();
+    $pageLink['#attributes'] = ['class'=>['use-ajax','pagination-link']];
+    $out = $out.render($pageLink);
+  }
+  $last_page = $count-1;
+  $page_link_last = Url::fromUserInput('/ajax/commerce_logstock/table/page/'.$last_page);
+  $page_link_last = Link::fromTextAndUrl('>>', $page_link_last);
+  $page_link_last = $page_link_last->toRenderable();
+  $page_link_last['#attributes'] = ['class'=>['use-ajax']];
+  $out = $out.render($page_link_last);
+  return $out;
+
+}

@@ -1,0 +1,5 @@
+commerce_logstock.logmanage:
+  route_name: commerce_logstock.logmanage
+  title: 'Log stock'
+  description: 'Administer Commerce log stock'
+  parent: 'commerce.admin_commerce'
