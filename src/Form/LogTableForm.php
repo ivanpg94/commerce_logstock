@@ -34,6 +34,11 @@ class LogTableForm extends FormBase
 
     //$pageNo = 2;
     $header = [
+      'tipo' => [
+        'data' => $this->t('Tipo'),
+        'sortable' => TRUE,
+        'field' => 'tipo',
+      ],
       'producto' => [
         'data' => $this->t('Sku'),
         'sortable' => TRUE,
@@ -43,6 +48,11 @@ class LogTableForm extends FormBase
         'data' => $this->t('Producto'),
         'sortable' => TRUE,
         'field' => 'producto_label',
+      ],
+      'precio_coste' => [
+        'data' => $this->t('Precio Coste'),
+        'sortable' => TRUE,
+        'field' => 'precio_coste',
       ],
       'pedido' => [
         'data' => $this->t('Pedido'),
@@ -128,10 +138,16 @@ class LogTableForm extends FormBase
     $producto = $field["producto"];
     $fecha = $field["fecha"];
     $user = $field["user"];
+    $tipo = $field["tipo"];
 
     $url = \Drupal\Core\Url::fromRoute('commerce_logstock.logmanage')
-      ->setRouteParameters(array('pedido' => $pedido, 'fecha' => $fecha, 'producto' => $producto));
-
+      ->setRouteParameters(array(
+        'pedido' => $pedido,
+        'fecha' => $fecha,
+        'producto' => $producto,
+        'user' => $user,
+        'tipo' => $tipo,
+      ));
     // Redireccionar a la página de resultados con los valores de filtro
     $form_state->setRedirectUrl($url);
 
@@ -161,6 +177,7 @@ class LogTableForm extends FormBase
     $producto = \Drupal::request()->query->get('producto');
     $fecha = \Drupal::request()->query->get('fecha');
     $user = \Drupal::request()->query->get('user');
+    $tipo = \Drupal::request()->query->get('user');
 
     $url = Url::fromRoute('<current>', [], [
       'query' => [
@@ -170,6 +187,7 @@ class LogTableForm extends FormBase
         'producto' => $producto,
         'fecha' => $fecha,
         'user' => $user,
+        'tipo' => $tipo, // Agrega este parámetro
       ],
     ]);
 
@@ -217,6 +235,11 @@ class LogTableForm extends FormBase
       $query->condition('st.fecha', strtotime($fecha));
     }
 
+    $tipo = \Drupal::request()->query->get('tipo');
+    if (!empty($tipo)) {
+      $query->condition('st.tipo', $tipo);
+    }
+
     $query->orderBy($sort_column, $sort_direction);
 
     if (is_numeric($opt)) {
@@ -233,6 +256,10 @@ class LogTableForm extends FormBase
       $fecha = date('d-m-Y', $fechaTimestamp);
       $hora = date('H:i:s', $horaTimestamp);
       $ret[] = [
+        'tipo' => [
+          'data' => $row->tipo,
+          'class' => ['mi-clase-tipo'],
+        ],
         'producto' => [
           'data' => $row->producto,
           'class' => ['mi-clase-producto'],
@@ -240,6 +267,10 @@ class LogTableForm extends FormBase
         'producto_label' => [
           'data' => $row->producto_label,
           'class' => ['mi-clase-producto-label'],
+        ],
+        'precio_coste' => [
+          'data' => $row->precio_coste,
+          'class' => ['mi-clase-precio-coste'],
         ],
         'pedido' => [
           'data' => $row->pedido,
@@ -278,11 +309,13 @@ class LogTableForm extends FormBase
     $producto = "";
     $fecha = "";
     $user = "";
+    $tipo = "";
 
     $pedido = \Drupal::request()->query->get('pedido');
     $producto = \Drupal::request()->query->get('producto');
     $fecha = \Drupal::request()->query->get('fecha');
     $user = \Drupal::request()->query->get('user');
+    $tipo = \Drupal::request()->query->get('tipo');
 
     //$sort_column = \Drupal::request()->query->get('sort_column', 'producto_label'); // Default sort column
 
@@ -301,6 +334,9 @@ class LogTableForm extends FormBase
 
       if (!empty($fecha)) {
         $query->condition('st.fecha', strtotime($fecha));
+      }
+      if (!empty($tipo) && $tipo !== 'todos') {
+        $query->condition('st.tipo', $tipo);
       }
 
       if (!empty($user)) {
@@ -347,6 +383,10 @@ class LogTableForm extends FormBase
           $order_edit_link = $row->pedido;
         }
         $ret[] = [
+          'tipo' => [
+            'data' => $row->tipo,
+            'class' => ['logstock-table-tipo'],
+          ],
           'producto' => [
             'data' => ['#markup' => $edit_product_link_sku],
             'class' => ['logstock-table-producto'],
@@ -354,6 +394,10 @@ class LogTableForm extends FormBase
           'producto_label' => [
             'data' => ['#markup' => $edit_product_link],
             'class' => ['logstock-table-producto-label'],
+          ],
+          'precio_coste' => [
+            'data' => $row->precio_coste,
+            'class' => ['logstock-table-precio-coste'],
           ],
           'pedido' => [
             'data' => $order_edit_link,
@@ -451,8 +495,10 @@ class LogTableForm extends FormBase
       $hora = date('H:i:s', $horaTimestamp); // Convierte timestamp UNIX a formato de hora.
 
       $ret[] = [
+        'tipo' => $row->tipo,
         'producto' => $row->producto,
         'producto_label' => $row->producto_label,
+        'precio_coste' => $row->precio_coste,
         'pedido' => $row->pedido,
         'fecha' => $fecha,
         'hora' => $hora,

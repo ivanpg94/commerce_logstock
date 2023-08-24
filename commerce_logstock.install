@@ -14,6 +14,11 @@ function commerce_logstock_schema(){
         'length' => 255,
         'not null' => TRUE,
       ),
+      'tipo' => array(
+         'type' => 'varchar',
+         'length' => 255,
+         'not null' => TRUE,
+      ),
       'producto' => array(
         'type' => 'varchar',
         'length' => 255,
@@ -23,6 +28,11 @@ function commerce_logstock_schema(){
         'type' => 'varchar',
         'length' => 255,
         'not null' => TRUE,
+      ),
+      'precio_coste' => array(
+          'type' => 'varchar',
+          'length' => 255,
+          'not null' => TRUE,
       ),
       'pedido' => array(
         'type' => 'varchar',

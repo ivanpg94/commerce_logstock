@@ -21,6 +21,7 @@ class LogfilterForm extends FormBase {
     $currentProducto = \Drupal::request()->query->get('producto');
     $currentFecha = \Drupal::request()->query->get('fecha');
     $currentUser = \Drupal::request()->query->get('user');
+    $currentTipo = \Drupal::request()->query->get('tipo');
 
 
     $form['filters'] = [
@@ -57,6 +58,16 @@ class LogfilterForm extends FormBase {
       '#default_value' => $currentFecha,
       '#autocomplete_route_name' => 'commerce_logstock.autocomplete.filterfecha',
       '#attributes' => ['class' => ['logstock-date']],
+    ];
+    $form['filters']['tipo'] = [
+      '#title' => t('Tipo'),
+      '#type' => 'select',
+      '#options' => [
+        'todos' => $this->t('Todos'),
+        'aumento' => $this->t('Aumento'),
+        'decremento' => $this->t('Decremento'),
+      ],
+      '#default_value' => $currentTipo,
     ];
     $form['filters']['actions'] = [
       '#type'       => 'actions'
@@ -100,6 +111,7 @@ class LogfilterForm extends FormBase {
     $producto = $field["producto"];
     $fecha = $field["fecha"];
     $user = $field["user"];
+    $tipo = $field["tipo"];
 
     $sort_column = \Drupal::request()->query->get('sort_column', 'producto_label');
     $sort_direction = \Drupal::request()->query->get('sort', 'desc');
@@ -110,6 +122,7 @@ class LogfilterForm extends FormBase {
         'fecha' => $fecha,
         'producto' => $producto,
         'user' => $user,
+        'tipo' => $tipo,
       ])
       ->setOption('query', [
         'sort_column' => $sort_column,

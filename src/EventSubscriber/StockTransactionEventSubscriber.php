@@ -62,7 +62,8 @@ class StockTransactionEventSubscriber implements EventSubscriberInterface {
           $product_variation = $pedido_item->getPurchasedEntity();
           $sku = $product_variation->getSku();
           $label = $product_variation->getTitle();
-
+          $precioCoste = $product_variation->field_cost->number;
+          $precioCoste = number_format($precioCoste,2, ",", ".") . ' €';
           $stock_transaction = $pedido_item->getQuantity();
           $stock = $stockService->getStockLevel($product_variation);
           if($order->state->value == 'cancel'){
@@ -71,6 +72,12 @@ class StockTransactionEventSubscriber implements EventSubscriberInterface {
             $stockinicial = $stock + $stock_transaction;
           }
           $stock_final = $stock;
+
+          if($stockinicial > $stock_final){
+            $tipo = 'Decremento';
+          }else{
+            $tipo = 'Aumento';
+          }
 
           // Comprueba si ya existe un registro con los mismos valores.
           $existing = $this->database->select('commerce_logstock', 'cls')
@@ -83,8 +90,10 @@ class StockTransactionEventSubscriber implements EventSubscriberInterface {
 
           if (!$existing) {
             $logstockData[] = [
+              'tipo' => $tipo,
               'producto' => $sku,
               'producto_label' => $label,
+              'precio_coste' => $precioCoste,
               'pedido' => $pedido,
               'fecha' => strtotime($fecha),
               'stockinicial' => $stockinicial,
@@ -99,9 +108,11 @@ class StockTransactionEventSubscriber implements EventSubscriberInterface {
           foreach ($logstockData as $values) {
             $this->database->insert('commerce_logstock')
               ->fields([
+                'tipo',
                 'producto',
                 'pedido',
                 'producto_label',
+                'precio_coste',
                 'fecha',
                 'stockinicial',
                 'stockfinal',
@@ -133,14 +144,24 @@ class StockTransactionEventSubscriber implements EventSubscriberInterface {
         $stockFinal = $stockactual;
         $sku = $product->variations->entity->sku->value;
         $label = $product->variations->entity->title->value;
+        $precioCoste = $product->variations->entity->field_cost->number;
+        $precioCoste = number_format($precioCoste,2, ",", ".") . ' €';
+
         $fecha = date('Y-m-d');
         $hora = date('H:i:s');
         $fechaCompleta = date('Y-m-d H:i:s');
+        if($stockInicial > $stockFinal){
+          $tipo = 'Decremento';
+        }else{
+          $tipo = 'Aumento';
+        }
         $database = \Drupal::database();
         $query = $database->insert('commerce_logstock')
           ->fields([
+            'tipo' => $tipo,
             'producto' => $sku,
             'producto_label' =>$label,
+            'precio_coste' => $precioCoste,
             'pedido' => $pedido,
             'fecha' => strtotime($fecha),
             'stockinicial' => $stockInicial,
@@ -165,12 +186,22 @@ class StockTransactionEventSubscriber implements EventSubscriberInterface {
       $stockFinal = $stockactual;
       $sku = $parameter->variations->entity->sku->value;
       $label = $parameter->variations->entity->title->value;
+      $precioCoste = $parameter->variations->entity->field_cost->number;
 
+      $precioCoste = number_format($precioCoste,2, ",", ".") . ' €';
+
+      if($stockInicial > $stockFinal){
+        $tipo = 'Decremento';
+      }else{
+        $tipo = 'Aumento';
+      }
       // Insertar los datos en la tabla 'commerce_logstock'.
       $this->database->insert('commerce_logstock')
         ->fields([
+          'tipo' => $tipo,
           'producto' => $sku,
           'producto_label' =>$label,
+          'precio_coste' => $precioCoste,
           'pedido' => $pedido,
           'fecha' => strtotime($fecha),
           'stockinicial' => $stockInicial,
@@ -200,14 +231,24 @@ class StockTransactionEventSubscriber implements EventSubscriberInterface {
       $stockFinal = $stockactual;
       $sku = $product->variations->entity->sku->value;
       $label = $product->variations->entity->title->value;
+      $precioCoste = $product->variations->entity->field_cost->number;
+      $precioCoste = number_format($precioCoste,2, ",", ".") . ' €';
+
       $fecha = date('Y-m-d');
       $hora = date('H:i:s');
       $fechaCompleta = date('Y-m-d H:i:s');
+      if($stockInicial > $stockFinal){
+        $tipo = 'Decremento';
+      }else{
+        $tipo = 'Aumento';
+      }
       $database = \Drupal::database();
       $query = $database->insert('commerce_logstock')
         ->fields([
+          'tipo' => $tipo,
           'producto' => $sku,
           'producto_label' =>$label,
+          'precio_coste' => $precioCoste,
           'pedido' => $pedido,
           'fecha' => strtotime($fecha),
           'stockinicial' => $stockInicial,
