@@ -52,64 +52,108 @@ class StockTransactionEventSubscriber implements EventSubscriberInterface {
     $current_user_id = Drupal::currentUser()->id();
     $user = \Drupal\user\Entity\User::load($current_user_id)->name->value;
     if ($order) {
-      $pedido = $order->order_id->value;
+      if($order->order_id) {
+        $pedido = $order->order_id->value;
+        $stockService = \Drupal::service('commerce_stock.service_manager');
+        $logstockData = [];
 
-      $stockService = \Drupal::service('commerce_stock.service_manager');
-      $logstockData = [];
 
-      foreach ($order->getItems() as $pedido_item) {
-        $product_variation = $pedido_item->getPurchasedEntity();
-        $sku = $product_variation->getSku();
-        $label = $product_variation->getTitle();
+        foreach ($order->getItems() as $pedido_item) {
+          $product_variation = $pedido_item->getPurchasedEntity();
+          $sku = $product_variation->getSku();
+          $label = $product_variation->getTitle();
 
-        $stock_transaction= $pedido_item->getQuantity();
-        $stock = $stockService->getStockLevel($product_variation);
-        $stockinicial = $stock + $stock_transaction;
-        $stock_final = $stock;
+          $stock_transaction = $pedido_item->getQuantity();
+          $stock = $stockService->getStockLevel($product_variation);
+          if($order->state->value == 'cancel'){
+            $stockinicial = $stock - $stock_transaction;
+          }else{
+            $stockinicial = $stock + $stock_transaction;
+          }
+          $stock_final = $stock;
 
-        // Comprueba si ya existe un registro con los mismos valores.
-        $existing = $this->database->select('commerce_logstock', 'cls')
-          ->fields('cls', ['producto', 'pedido'])
-          ->condition('producto', $sku)
-          ->condition('pedido', $pedido)
-          ->execute()
-          ->fetchAssoc();
+          // Comprueba si ya existe un registro con los mismos valores.
+          $existing = $this->database->select('commerce_logstock', 'cls')
+            ->fields('cls', ['producto', 'pedido', 'hora'])
+            ->condition('producto', $sku)
+            ->condition('pedido', $pedido)
+            ->condition('hora', strtotime($hora))
+            ->execute()
+            ->fetchAssoc();
 
-        if (!$existing) {
-          $logstockData[] = [
+          if (!$existing) {
+            $logstockData[] = [
+              'producto' => $sku,
+              'producto_label' => $label,
+              'pedido' => $pedido,
+              'fecha' => strtotime($fecha),
+              'stockinicial' => $stockinicial,
+              'stockfinal' => $stock_final,
+              'fechacompleta' => strtotime($fechaCompleta),
+              'hora' => strtotime($hora),
+              'user' => $user,
+            ];
+          }
+        }
+        if (!empty($logstockData)) {
+          foreach ($logstockData as $values) {
+            $this->database->insert('commerce_logstock')
+              ->fields([
+                'producto',
+                'pedido',
+                'producto_label',
+                'fecha',
+                'stockinicial',
+                'stockfinal',
+                'fechacompleta',
+                'hora',
+                'user',
+              ])
+              ->values($values)
+              ->execute();
+          }
+        }
+      }else{
+        $data = $event->getEntity();
+        $id_variacion = $data->variation_id->value;
+        $variation = \Drupal::entityTypeManager()->getStorage('commerce_product_variation')->load($id_variacion);
+        $product_id = $variation->product_id->getValue()[0]['target_id'];
+
+        $product = \Drupal::entityTypeManager()->getStorage('commerce_product')->load($product_id);
+
+        $pedido = 'Actualizacion Stock desde la ficha del Pedido';
+        $id = $product->variations->entity->variation_id->value;
+        $stockService = \Drupal::service('commerce_stock.service_manager');
+
+        $variation = \Drupal::entityTypeManager()->getStorage('commerce_product_variation')->load($id);
+        $stockactual = $stockService->getStockLevel($variation);
+        $stock_transaction = $variation->field_stock->value;
+
+        $stockInicial = $stockactual - $stock_transaction; // Cambia esto al valor real.
+        $stockFinal = $stockactual;
+        $sku = $product->variations->entity->sku->value;
+        $label = $product->variations->entity->title->value;
+        $fecha = date('Y-m-d');
+        $hora = date('H:i:s');
+        $fechaCompleta = date('Y-m-d H:i:s');
+        $database = \Drupal::database();
+        $query = $database->insert('commerce_logstock')
+          ->fields([
             'producto' => $sku,
             'producto_label' =>$label,
             'pedido' => $pedido,
             'fecha' => strtotime($fecha),
-            'stockinicial' => $stockinicial,
-            'stockfinal' => $stock_final,
+            'stockinicial' => $stockInicial,
+            'stockfinal' => $stockFinal,
             'fechacompleta' => strtotime($fechaCompleta),
             'hora' => strtotime($hora),
             'user' => $user,
-          ];
-        }
-      }
-
-      if (!empty($logstockData)) {
-        foreach ($logstockData as $values) {
-          $this->database->insert('commerce_logstock')
-            ->fields([
-              'producto',
-              'pedido',
-              'producto_label',
-              'fecha',
-              'stockinicial',
-              'stockfinal',
-              'fechacompleta',
-              'hora',
-              'user',
-            ])
-            ->values($values)
-            ->execute();
-        }
+          ])
+          ->execute();
       }
     }else if($parameter){
       $pedido = 'Actualizacion Stock sin Pedido';
+
       $stockService = \Drupal::service('commerce_stock.service_manager');
 
       $id = $parameter->variations->entity->variation_id->value;
@@ -138,7 +182,6 @@ class StockTransactionEventSubscriber implements EventSubscriberInterface {
         ->execute();
     }else{
       $data = $event->getEntity();
-
       $id_variacion = $data->variation_id->value;
       $variation = \Drupal::entityTypeManager()->getStorage('commerce_product_variation')->load($id_variacion);
       $product_id = $variation->product_id->getValue()[0]['target_id'];

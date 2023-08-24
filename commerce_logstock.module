@@ -9,6 +9,9 @@ function commerce_logstock_element_info_alter(array &$types) {
     $types['table']['#attached']['library'][] = 'commerce_logstock/commerce_logstock';
   }
 }
+function commerce_logstock_form($form, &$form_state, $form_id) {
+  // Tu código de construcción de formulario aquí.
+}
 
 function getPager(){
   $pedido = \Drupal::request()->query->get('pedido');

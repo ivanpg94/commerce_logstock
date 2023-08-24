@@ -55,7 +55,6 @@ function commerce_logstock_schema(){
               'not null' => TRUE,
             ),
     ),
-  'primary key' => array('fechacompleta'), // Cambiar esto según tu necesidad
       'indexes' => array(
         'idx_fecha_producto' => array('fechacompleta', 'producto'),
       ),

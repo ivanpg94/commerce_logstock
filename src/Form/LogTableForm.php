@@ -341,7 +341,7 @@ class LogTableForm extends FormBase
         $user_edit_link = Link::fromTextAndUrl($this->t($username), $user->toUrl('edit-form'))->toString();
 
         $order_edit_link = Link::fromTextAndUrl($this->t($row->pedido), Url::fromRoute('entity.commerce_order.canonical', ['commerce_order' => $order_number]));
-        if($order_number !== 'Actualizacion Stock sin Pedido'){
+        if($order_number !== 'Actualizacion Stock sin Pedido' && $order_number !== 'Actualizacion Stock desde la ficha del Pedido'){
           $order_edit_link = Link::fromTextAndUrl($this->t($row->pedido), Url::fromRoute('entity.commerce_order.canonical', ['commerce_order' => $order_number]));
         }else{
           $order_edit_link = $row->pedido;
